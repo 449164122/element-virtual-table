@@ -19,6 +19,10 @@ interface TableBodyProps<T> {
   highlight: boolean
   tooltipEffect?: string
   tooltipOptions?: TableOverflowTooltipOptions
+  itemSize?: string | number
+  buffer?: string | number
+  estimatedItemSize?: string | number
+  virtualType?: string
 }
 
 const defaultProps = {
@@ -46,6 +50,14 @@ const defaultProps = {
     default: '',
   },
   highlight: Boolean,
+  type: String,
+  itemSize: [String, Number],
+  buffer: [String, Number],
+  estimatedItemSize: [String, Number],
+  virtualType: {
+    type: String,
+    default: 'dynamic',
+  },
 }
 
 export { TableBodyProps }

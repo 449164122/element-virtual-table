@@ -2,6 +2,7 @@
   <div
     ref="tableWrapper"
     :class="[
+      'virtual-table',
       {
         [ns.m('fit')]: fit,
         [ns.m('striped')]: stripe,
@@ -58,74 +59,72 @@
         </table>
       </div>
       <div ref="bodyWrapper" :class="ns.e('body-wrapper')">
-        <el-scrollbar
-          ref="scrollBarRef"
-          :view-style="scrollbarViewStyle"
-          :wrap-style="scrollbarStyle"
-          :always="scrollbarAlwaysOn"
+        <div ref="phantomRef" :style="{height: store.states.data.value.length * itemSize + 'px'}"></div>
+        <table
+          ref="tableBody"
+          :class="ns.e('body')"
+          cellspacing="0"
+          cellpadding="0"
+          border="0"
+          :style="{
+            width: bodyWidth,
+            tableLayout,
+          }"
         >
-          <table
-            ref="tableBody"
-            :class="ns.e('body')"
-            cellspacing="0"
-            cellpadding="0"
-            border="0"
-            :style="{
-              width: bodyWidth,
-              tableLayout,
-            }"
-          >
-            <hColgroup
-              :columns="store.states.columns.value"
-              :table-layout="tableLayout"
-            />
-            <table-header
-              v-if="showHeader && tableLayout === 'auto'"
-              ref="tableHeaderRef"
-              :class="ns.e('body-header')"
-              :border="border"
-              :default-sort="defaultSort"
-              :store="store"
-              @set-drag-visible="setDragVisible"
-            />
-            <table-body
-              :context="context"
-              :highlight="highlightCurrentRow"
-              :row-class-name="rowClassName"
-              :tooltip-effect="tooltipEffect"
-              :tooltip-options="tooltipOptions"
-              :row-style="rowStyle"
-              :store="store"
-              :stripe="stripe"
-            />
-            <table-footer
-              v-if="showSummary && tableLayout === 'auto'"
-              :class="ns.e('body-footer')"
-              :border="border"
-              :default-sort="defaultSort"
-              :store="store"
-              :sum-text="computedSumText"
-              :summary-method="summaryMethod"
-            />
-          </table>
-          <div
-            v-if="isEmpty"
-            ref="emptyBlock"
-            :style="emptyBlockStyle"
-            :class="ns.e('empty-block')"
-          >
-            <span :class="ns.e('empty-text')">
-              <slot name="empty">{{ computedEmptyText }}</slot>
-            </span>
-          </div>
-          <div
-            v-if="$slots.append"
-            ref="appendWrapper"
-            :class="ns.e('append-wrapper')"
-          >
-            <slot name="append" />
-          </div>
-        </el-scrollbar>
+          <hColgroup
+            :columns="store.states.columns.value"
+            :table-layout="tableLayout"
+          />
+          <table-header
+            v-if="showHeader && tableLayout === 'auto'"
+            ref="tableHeaderRef"
+            :class="ns.e('body-header')"
+            :border="border"
+            :default-sort="defaultSort"
+            :store="store"
+            @set-drag-visible="setDragVisible"
+          />
+          <table-body
+            :context="context"
+            :highlight="highlightCurrentRow"
+            :row-class-name="rowClassName"
+            :tooltip-effect="tooltipEffect"
+            :tooltip-options="tooltipOptions"
+            :row-style="rowStyle"
+            :store="store"
+            :stripe="stripe"
+            :virtualType="virtualType"
+            :buffer="buffer"
+            :itemSize="itemSize"
+            :estimatedItemSize="estimatedItemSize"
+          />
+          <table-footer
+            v-if="showSummary && tableLayout === 'auto'"
+            :class="ns.e('body-footer')"
+            :border="border"
+            :default-sort="defaultSort"
+            :store="store"
+            :sum-text="computedSumText"
+            :summary-method="summaryMethod"
+          />
+        </table>
+        <div
+          v-if="isEmpty"
+          ref="emptyBlock"
+          :style="emptyBlockStyle"
+          :class="ns.e('empty-block')"
+        >
+          <span :class="ns.e('empty-text')">
+            <slot name="empty">{{ computedEmptyText }}</slot>
+          </span>
+        </div>
+        <div
+          v-if="$slots.append"
+          ref="appendWrapper"
+          :class="ns.e('append-wrapper')"
+        >
+          <slot name="append" />
+        </div>
       </div>
       <div
         v-if="showSummary && tableLayout === 'fixed'"
@@ -166,11 +165,10 @@
 
 <script lang="ts">
 // @ts-nocheck
-import { computed, defineComponent, getCurrentInstance, provide } from 'vue'
+import { computed, defineComponent, getCurrentInstance, provide, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { debounce } from 'lodash-unified'
 import { Mousewheel } from '@element-plus/directives'
 import { useLocale, useNamespace } from '@element-plus/hooks'
-import ElScrollbar from '@element-plus/components/scrollbar'
 import { createStore } from './store/helper'
 import TableLayout from './table-layout'
 import TableHeader from './table-header'
@@ -196,7 +194,6 @@ export default defineComponent({
     TableHeader,
     TableBody,
     TableFooter,
-    ElScrollbar,
     hColgroup,
   },
   props: defaultProps,
@@ -277,7 +274,40 @@ export default defineComponent({
       useScrollbar()
 
     const debouncedUpdateLayout = debounce(doLayout, 50)
-
+    watch(bodyWidth, (val: string) => {
+      if (val) {
+        const bodyWrapper = table.refs?.bodyWrapper as HTMLElement;
+        const bodyWidth =+val.slice(0, -2);
+        if (bodyWrapper.offsetWidth !== bodyWidth) {
+          bodyWrapper.style.overflowX = 'auto';
+        } else {
+          bodyWrapper.style.overflowX = 'hidden';
+        }
+      }
+    })
+    watch(() => props.data, () => {
+      nextTick(() => {
+        const tableWrapper = table.refs?.tableWrapper as HTMLElement;
+        const bodyWrapper = table.refs?.bodyWrapper as HTMLElement;
+        if (tableWrapper && bodyWrapper) {
+          tableWrapper.style.setProperty('--scroller-width', `${bodyWrapper.offsetWidth - bodyWrapper.clientWidth}px`);
+        }
+      })
+    })
+    function handleScroll(event) {
+      const headerWrapper = table.refs?.headerWrapper as HTMLElement;
+      const target = event.target as HTMLElement;
+      headerWrapper.scrollLeft = target.scrollLeft;
+    }
+    onMounted(()=>{
+      const bodyWrapper = table.refs?.bodyWrapper as HTMLElement;
+      bodyWrapper.addEventListener('scroll', handleScroll)
+    })
+    onBeforeUnmount(()=>{
+      const bodyWrapper = table.refs?.bodyWrapper as HTMLElement;
+      bodyWrapper.removeEventListener('scroll', handleScroll)
+    })
+    
     const tableId = `${ns.namespace.value}-table_${tableIdSeed++}`
     table.tableId = tableId
     table.state = {
@@ -289,7 +319,6 @@ export default defineComponent({
     const computedSumText = computed(
       () => props.sumText || t('el.table.sumText')
     )
-
     const computedEmptyText = computed(() => {
       return props.emptyText || t('el.table.emptyText')
     })

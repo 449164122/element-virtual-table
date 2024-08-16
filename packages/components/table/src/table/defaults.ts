@@ -91,6 +91,10 @@ type CellStyle<T> =
 type Layout = 'fixed' | 'auto'
 interface TableProps<T> {
   data: T[]
+  itemSize?: number
+  buffer?: string | number
+  estimatedItemSize?: string | number
+  virtualType?: string
   size?: ComponentSize
   width?: string | number
   height?: string | number
@@ -184,6 +188,16 @@ export default {
   data: {
     type: Array as PropType<DefaultRow[]>,
     default: () => [],
+  },
+  itemSize: {
+    type: Number,
+    default: 40,
+  },
+  buffer: [String, Number],
+  estimatedItemSize: [String, Number],
+  virtualType: {
+    type: String,
+    default: 'dynamic',
   },
   size: useSizeProp,
   width: [String, Number],

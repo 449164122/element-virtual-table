@@ -14,7 +14,8 @@ import { removePopper } from '../util'
 import { TABLE_INJECTION_KEY } from '../tokens'
 import useRender from './render-helper'
 import defaultProps from './defaults'
-
+import dynamicVirtualList from '../../../virtual-list//dynamic-size'
+import fixedVirtualList from '../../../virtual-list/fixed-size'
 import type { VNode } from 'vue'
 
 export default defineComponent({
@@ -100,15 +101,12 @@ export default defineComponent({
   render() {
     const { wrappedRowRender, store } = this
     const data = store.states.data.value || []
+    console.log('render',data.length)
     // Why do we need tabIndex: -1 ?
     // If you set the tabindex attribute on an element ,
     // then its child content cannot be scrolled with the arrow keys,
     // unless you set tabindex on the content too
     // See https://github.com/facebook/react/issues/25462#issuecomment-1274775248 or https://developer.mozilla.org/zh-CN/docs/Web/HTML/Global_attributes/tabindex
-    return h('tbody', { tabIndex: -1 }, [
-      data.reduce((acc: VNode[], row) => {
-        return acc.concat(wrappedRowRender(row, acc.length))
-      }, []),
-    ])
+    return h(this.virtualType ==='fixed'? fixedVirtualList : dynamicVirtualList, {data, wrappedRowRender, itemSize: this.itemSize, buffer: this.buffer, estimatedItemSize: this.estimatedItemSize })
   },
 })

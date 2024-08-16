@@ -165,7 +165,7 @@ function useStyle<T>(
     return !!(tableWrapper && tableWrapper.classList.contains(className))
   }
   const syncPosition = function () {
-    if (!table.refs.scrollBarRef) return
+    if (!table.refs.bodyWrapper) return
     if (!layout.scrollX.value) {
       const scrollingNoneClass = 'is-scrolling-none'
       if (!hasScrollClass(scrollingNoneClass)) {
@@ -173,7 +173,7 @@ function useStyle<T>(
       }
       return
     }
-    const scrollContainer = table.refs.scrollBarRef.wrapRef
+    const scrollContainer = table.refs.bodyWrapper
     if (!scrollContainer) return
     const { scrollLeft, offsetWidth, scrollWidth } = scrollContainer
     const { headerWrapper, footerWrapper } = table.refs
@@ -190,10 +190,10 @@ function useStyle<T>(
   }
 
   const bindEvents = () => {
-    if (!table.refs.scrollBarRef) return
-    if (table.refs.scrollBarRef.wrapRef) {
+    if (!table.refs.bodyWrapper) return
+    if (table.refs.bodyWrapper) {
       useEventListener(
-        table.refs.scrollBarRef.wrapRef,
+        table.refs.bodyWrapper,
         'scroll',
         syncPosition,
         {

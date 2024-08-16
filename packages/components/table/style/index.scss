@@ -1,0 +1,16 @@
+.virtual-table {
+  .el-table__body-wrapper {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+  }
+  .el-table__header-wrapper {
+    width: calc(100% - var(--scroller-width));
+  }
+  .el-table__body {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+}

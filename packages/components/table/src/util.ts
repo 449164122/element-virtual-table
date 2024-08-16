@@ -508,7 +508,7 @@ export const getFixedColumnOffset = <T>(
     styles.right = columns
       .slice(after + 1)
       .reverse()
-      .reduce(getOffset, 0)
+      .reduce(getOffset, -15)
   }
   return styles
 }
