@@ -19,10 +19,10 @@ interface TableBodyProps<T> {
   highlight: boolean
   tooltipEffect?: string
   tooltipOptions?: TableOverflowTooltipOptions
-  itemSize?: string | number
-  buffer?: string | number
-  estimatedItemSize?: string | number
-  virtualType?: string
+  scrollBarRef: any
+  rowHeight: number | string
+  visibleCount: number | string
+  buffer: number | string
 }
 
 const defaultProps = {
@@ -50,14 +50,10 @@ const defaultProps = {
     default: '',
   },
   highlight: Boolean,
-  type: String,
-  itemSize: [String, Number],
-  buffer: [String, Number],
-  estimatedItemSize: [String, Number],
-  virtualType: {
-    type: String,
-    default: 'dynamic',
-  },
+  scrollBarRef: Object,
+  rowHeight: [Number, String],
+  visibleCount: [Number, String],
+  buffer: [Number, String],
 }
 
 export { TableBodyProps }

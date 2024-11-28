@@ -165,7 +165,7 @@ function useStyle<T>(
     return !!(tableWrapper && tableWrapper.classList.contains(className))
   }
   const syncPosition = function () {
-    if (!table.refs.bodyWrapper) return
+    if (!table.refs.scrollBarRef) return
     if (!layout.scrollX.value) {
       const scrollingNoneClass = 'is-scrolling-none'
       if (!hasScrollClass(scrollingNoneClass)) {
@@ -173,7 +173,7 @@ function useStyle<T>(
       }
       return
     }
-    const scrollContainer = table.refs.bodyWrapper
+    const scrollContainer = table.refs.scrollBarRef.wrapRef
     if (!scrollContainer) return
     const { scrollLeft, offsetWidth, scrollWidth } = scrollContainer
     const { headerWrapper, footerWrapper } = table.refs
@@ -190,10 +190,10 @@ function useStyle<T>(
   }
 
   const bindEvents = () => {
-    if (!table.refs.bodyWrapper) return
-    if (table.refs.bodyWrapper) {
+    if (!table.refs.scrollBarRef) return
+    if (table.refs.scrollBarRef.wrapRef) {
       useEventListener(
-        table.refs.bodyWrapper,
+        table.refs.scrollBarRef.wrapRef,
         'scroll',
         syncPosition,
         {
@@ -286,24 +286,6 @@ function useStyle<T>(
     }
   })
 
-  const tableInnerStyle = computed(() => {
-    if (props.height) {
-      return {
-        height: !Number.isNaN(Number(props.height))
-          ? `${props.height}px`
-          : props.height,
-      }
-    }
-    if (props.maxHeight) {
-      return {
-        maxHeight: !Number.isNaN(Number(props.maxHeight))
-          ? `${props.maxHeight}px`
-          : props.maxHeight,
-      }
-    }
-    return {}
-  })
-
   const scrollbarStyle = computed(() => {
     if (props.height) {
       return {
@@ -370,7 +352,6 @@ function useStyle<T>(
     tableBodyStyles,
     tableLayout,
     scrollbarViewStyle,
-    tableInnerStyle,
     scrollbarStyle,
   }
 }

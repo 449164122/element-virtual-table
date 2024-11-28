@@ -14,8 +14,8 @@ import { removePopper } from '../util'
 import { TABLE_INJECTION_KEY } from '../tokens'
 import useRender from './render-helper'
 import defaultProps from './defaults'
-import dynamicVirtualList from '../../../virtual-list//dynamic-size'
-import fixedVirtualList from '../../../virtual-list/fixed-size'
+import fixedVirtualList from '../../../virtual-list/fixed-size.vue'
+
 import type { VNode } from 'vue'
 
 export default defineComponent({
@@ -40,23 +40,28 @@ export default defineComponent({
       let rowNum = newVal
       const childNodes = rows[rowNum]?.childNodes
       if (childNodes?.length) {
+        let control = 0
         const indexes = Array.from(childNodes).reduce((acc, item, index) => {
           // drop colsSpan
-          const pre = childNodes[index - 1]?.colSpan > 1
-          const next = childNodes[index + 1]?.colSpan > 1
-          if (item.nodeName !== 'TD' && !pre && !next) {
+          if (childNodes[index]?.colSpan > 1) {
+            control = childNodes[index]?.colSpan
+          }
+          if (item.nodeName !== 'TD' && control === 0) {
             acc.push(index)
           }
+          control > 0 && control--
           return acc
         }, [])
 
         indexes.forEach((rowIndex) => {
+          rowNum = newVal
           while (rowNum > 0) {
             // find from previous
             const preChildNodes = rows[rowNum - 1]?.childNodes
             if (
               preChildNodes[rowIndex] &&
-              preChildNodes[rowIndex].nodeName === 'TD'
+              preChildNodes[rowIndex].nodeName === 'TD' &&
+              preChildNodes[rowIndex].rowSpan > 1
             ) {
               addClass(preChildNodes[rowIndex], 'hover-cell')
               hoveredCellList.push(preChildNodes[rowIndex])
@@ -99,14 +104,13 @@ export default defineComponent({
     }
   },
   render() {
-    const { wrappedRowRender, store } = this
+    const { wrappedRowRender, store, scrollBarRef, rowHeight, visibleCount, buffer } = this
     const data = store.states.data.value || []
-    console.log('render',data.length)
     // Why do we need tabIndex: -1 ?
     // If you set the tabindex attribute on an element ,
     // then its child content cannot be scrolled with the arrow keys,
     // unless you set tabindex on the content too
     // See https://github.com/facebook/react/issues/25462#issuecomment-1274775248 or https://developer.mozilla.org/zh-CN/docs/Web/HTML/Global_attributes/tabindex
-    return h(this.virtualType ==='fixed'? fixedVirtualList : dynamicVirtualList, {data, wrappedRowRender, itemSize: this.itemSize, buffer: this.buffer, estimatedItemSize: this.estimatedItemSize })
+    return h(fixedVirtualList, {data, wrappedRowRender, scrollBarRef, rowHeight, visibleCount, buffer })
   },
 })

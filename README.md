@@ -1,39 +1,23 @@
 # element-virtual-table
+基于element-plus中el-table的虚拟表格组件，功能和el-table一致，但是性能更好，支持大数据量渲染，暂时只支持纵向虚拟表格，且行高固定
+## 安装
+```bash
+npm install element-virtual-table
+```
+## 使用
+```javascript
+import elVirtualTable from 'element-virtual-table'
 
-This template should help get you started developing with Vue 3 in Vite.
+除组件名同el-table不一致外，其他使用方式完全一致
+```
+## API
 
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+```
+| 参数 | 说明 | 类型 | 默认值 |
+| ---- | ---- | ---- | ---- |
+| data | 表数据 | Array | [] |
+| rowHeight | 行高（一定要传） | Number | 40 |
+| visibleCount | 要显示的数据（初始会自动根据容器高度计算） | Number | 10  |
+| buffer | 缓冲数量 | Number | 5 |
 ```
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
