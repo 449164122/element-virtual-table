@@ -47,14 +47,7 @@ export default defineComponent({
       const newEndIndex = Math.min(props.data.length - 1, startIndex.value + visibleItemCount + props.buffer - 1);
 
       // 根据起始和结束索引计算可见数据
-      visibleData.value = [];
-      for (let i = newStartIndex; i <= newEndIndex; i++) {
-        visibleData.value.push({
-          ...props.data[i],
-          top: i * (typeof props.rowHeight === 'number' ? props.rowHeight : parseInt(props.rowHeight)),
-        });
-      }
-
+      visibleData.value = props.data.slice(newStartIndex, newEndIndex + 1);
       const table = scrollContainer?.querySelector('.virtual-list table');
       if (table) {
         table.style.transform = `translateY(${newStartIndex * (typeof props.rowHeight === 'number' ? props.rowHeight : parseInt(props.rowHeight))}px)`;
