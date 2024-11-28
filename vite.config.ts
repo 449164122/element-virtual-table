@@ -14,8 +14,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'packages/components/table/index.ts'),
-      name: 'MyTableComponent',
-      fileName: (format) => `my-table-component.${format}.js`
+      name: 'el-virtual-table',
+      fileName: (format) => `el-virtual-table.${format}.js`
     },
     rollupOptions: {
       // 确保外部化处理那些你不想打包进库的依赖
