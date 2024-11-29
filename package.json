@@ -11,7 +11,10 @@
     "type-check": "vue-tsc --build --force",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
-  "main": "dist/el-virtual-table.es",
+  "main": "dist/el-virtual-table.es.js",
+  "files": [
+    "dist", "README.md"
+  ],
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
     "element-plus": "~2.5.3",
