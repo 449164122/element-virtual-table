@@ -112,14 +112,15 @@ function useEvents<T>(props: Partial<TableBodyProps<T>>) {
       return
     }
 
-    // 判断是否text-overflow, 如果是就显示tooltip
+    // 判断是否text-overflow, 如果是就显示tooltip， cell.textContent) 为''时，不显示tooltip
     const cellChild = (event.target as HTMLElement).querySelector(
       '.cell'
     ) as HTMLElement
     if (
       !(
         hasClass(cellChild, `${namespace}-tooltip`) &&
-        cellChild.childNodes.length
+        cellChild.childNodes.length &&
+        cell?.textContent !== ''
       )
     ) {
       return
