@@ -1,5 +1,5 @@
 <script lang="ts">
-import { ref, watch, nextTick, h, defineComponent, PropType } from 'vue';
+import { ref, watch, nextTick, h, defineComponent, type PropType, onActivated } from 'vue';
 
 interface RowData {
   [key: string]: any; // 可以扩展字段的类型，例如可以是字符串、数字等
@@ -79,6 +79,7 @@ export default defineComponent({
       () => props.scrollBarRef,
       (val) => {
         if (val.wrapRef) {
+          val.wrapRef.removeEventListener('scroll', onScroll);
           val.wrapRef.addEventListener('scroll', onScroll);
           nextTick(() => {
             updateVisibleData();
@@ -87,6 +88,15 @@ export default defineComponent({
       },
       { deep: true }
     );
+
+    onActivated(() => {
+      if (props.scrollBarRef?.wrapRef) {
+        // 缓存组件重新激活时，重新计算可见数据
+        nextTick(() => {
+          updateVisibleData();
+        });
+      }
+    });
 
     return {
       visibleData,
@@ -97,7 +107,7 @@ export default defineComponent({
       'tbody',
       { tabIndex: -1 },
       this.visibleData.reduce((acc, row, index) => {
-        return acc.concat(this.wrappedRowRender(row, index, this.rowHeight));
+        return acc.concat(this.wrappedRowRender?.(row, index, this.rowHeight));
       }, []),
     );
   },
