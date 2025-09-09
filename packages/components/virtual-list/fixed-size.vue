@@ -1,5 +1,6 @@
 <script lang="ts">
-import { ref, watch, nextTick, h, defineComponent, type PropType, onActivated } from 'vue';
+import { ref, watch, nextTick, h, defineComponent, type PropType, onBeforeUnmount } from 'vue';
+import ResizeObserver from 'resize-observer-polyfill'
 
 interface RowData {
   [key: string]: any; // 可以扩展字段的类型，例如可以是字符串、数字等
@@ -74,27 +75,31 @@ export default defineComponent({
       updateVisibleData();
     });
 
+    let observer: ResizeObserver | null = null;
+    let wrapRef: HTMLElement | null = null;
     // 监听 scrollBarRef 变化并绑定滚动事件
     watch(
       () => props.scrollBarRef,
       (val) => {
         if (val.wrapRef) {
-          val.wrapRef.removeEventListener('scroll', onScroll);
-          val.wrapRef.addEventListener('scroll', onScroll);
-          nextTick(() => {
-            updateVisibleData();
+          wrapRef = val.wrapRef;
+          wrapRef?.removeEventListener('scroll', onScroll);
+          wrapRef?.addEventListener('scroll', onScroll);
+          observer = new ResizeObserver(() => {
+            nextTick(() => {
+              updateVisibleData();
+            });
           });
+          observer?.observe(val.wrapRef);
         }
       },
       { deep: true }
     );
 
-    onActivated(() => {
-      if (props.scrollBarRef?.wrapRef) {
-        // 缓存组件重新激活时，重新计算可见数据
-        nextTick(() => {
-          updateVisibleData();
-        });
+    onBeforeUnmount(() => {
+      wrapRef?.removeEventListener('scroll', onScroll);
+      if (observer) {
+        observer.disconnect();
       }
     });
 
